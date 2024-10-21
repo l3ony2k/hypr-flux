@@ -1,24 +1,47 @@
 import React from 'react';
+import { Trash2 } from 'lucide-react';
 import { GeneratedImage } from '../types';
 
 interface ImageHistoryProps {
   images: GeneratedImage[];
+  onClearHistory: () => void;
+  onImageClick: (image: GeneratedImage) => void;
 }
 
-const ImageHistory: React.FC<ImageHistoryProps> = ({ images }) => {
+const ImageHistory: React.FC<ImageHistoryProps> = ({
+  images,
+  onClearHistory,
+  onImageClick,
+}) => {
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">History</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-2xl font-bold">History</h2>
+        <button
+          onClick={onClearHistory}
+          className="text-red-500 hover:text-red-700 flex items-center"
+        >
+          <Trash2 size={20} className="mr-1" />
+        </button>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
         {images.map((image, index) => (
-          <div key={index} className="border rounded-lg p-4">
-            <img src={image.url} alt={image.prompt} className="w-full h-48 object-cover mb-2 rounded" />
-            <p className="text-xs font-medium text-gray-700 mb-1 line-clamp-2">Prompt: {image.prompt}</p>
-            <p className="text-xs text-gray-500">
-              Settings: {image.settings.model}, {image.settings.steps} steps, {image.settings.width}x{image.settings.height}
+          <div
+            key={index}
+            className="cursor-pointer"
+            onClick={() => onImageClick(image)}
+          >
+            <img
+              src={image.url}
+              alt={image.prompt}
+              className="w-full h-32 object-cover mb-1"
+            />
+            <p className="text-xs text-gray-600 truncate">
+              <strong>Prompt: </strong>
+              {image.prompt}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Generated: {new Date(image.timestamp).toLocaleString()}
+            <p className="text-xs text-gray-500">
+              {new Date(image.timestamp).toLocaleDateString()}
             </p>
           </div>
         ))}
