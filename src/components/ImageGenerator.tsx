@@ -17,10 +17,11 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   const [height, setHeight] = useState(1024);
   const [width, setWidth] = useState(1024);
   const [model, setModel] = useState('flux-1.1-pro');
+  const [customModel, setCustomModel] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const models = (import.meta.env.VITE_HYPRLAB_MODELS || '').split(',');
+  const models = ['custom', ...(import.meta.env.VITE_HYPRLAB_MODELS || '').split(',')];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,12 +38,12 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model,
+            model: model === 'custom' ? customModel : model,
             prompt,
             steps,
             height,
             width,
-            response_format: 'url',
+            response_format: 'b64_json',
             output_format: 'png',
           }),
         }
@@ -55,9 +56,14 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
 
       const data = await response.json();
       const newImage: GeneratedImage = {
-        url: data.data[0].url,
+        imageData: data.data[0].b64_json,
         prompt,
-        settings: { model, steps, height, width },
+        settings: { 
+          model: model === 'custom' ? customModel : model, 
+          steps, 
+          height, 
+          width 
+        },
         timestamp: new Date().toISOString(),
       };
 
@@ -118,6 +124,16 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
               </option>
             ))}
           </select>
+          {model === 'custom' && (
+            <input
+              type="text"
+              value={customModel}
+              onChange={(e) => setCustomModel(e.target.value)}
+              required={model === 'custom'}
+              className="mt-2 block w-full border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+              placeholder="Enter custom model name"
+            />
+          )}
         </div>
         <div className="flex-grow flex flex-col">
           <label
@@ -190,8 +206,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
         </div>
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-2 focus:outline-none focus:shadow-outline flex items-center justify-center"
+          disabled={isLoading || (model === 'custom' && !customModel)}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold p-2 focus:outline-none focus:shadow-outline flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>

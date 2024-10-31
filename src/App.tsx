@@ -58,7 +58,7 @@ function App() {
             {currentImage ? (
               <>
                 <img
-                  src={currentImage.url}
+                  src={`data:image/png;base64,${currentImage.imageData}`}
                   alt={currentImage.prompt}
                   className="w-full h-auto object-contain"
                   style={{ maxHeight: 'calc(100% - 4rem)' }}

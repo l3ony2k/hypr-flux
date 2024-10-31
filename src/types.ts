@@ -1,5 +1,5 @@
 export interface GeneratedImage {
-  url: string;
+  imageData: string;  // base64 encoded image data
   prompt: string;
   settings: {
     model: string;

@@ -32,7 +32,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
             onClick={() => onImageClick(image)}
           >
             <img
-              src={image.url}
+              src={`data:image/png;base64,${image.imageData}`}
               alt={image.prompt}
               className="w-full h-32 object-cover mb-1"
             />
