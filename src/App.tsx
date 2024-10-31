@@ -4,33 +4,64 @@ import ImageGenerator from './components/ImageGenerator';
 import ImageHistory from './components/ImageHistory';
 import ImageModal from './components/ImageModal';
 import { GeneratedImage } from './types';
+import { initDB, saveImage, getImage, clearImages } from './utils/db';
 
 function App() {
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
-  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(
-    null
-  );
+  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedImages = localStorage.getItem('generatedImages');
-    if (savedImages) {
-      setGeneratedImages(JSON.parse(savedImages));
-    }
+    const init = async () => {
+      try {
+        await initDB();
+        const savedMetadata = localStorage.getItem('generatedImages');
+        if (savedMetadata) {
+          const metadata = JSON.parse(savedMetadata);
+          const images = await Promise.all(
+            metadata.map(async (img: GeneratedImage) => {
+              const imageData = await getImage(img.timestamp);
+              return imageData ? { ...img, imageData } : null;
+            })
+          );
+          setGeneratedImages(images.filter(Boolean));
+        }
+      } catch (error) {
+        console.error('Failed to initialize DB:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    init();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('generatedImages', JSON.stringify(generatedImages));
+    const saveMetadata = async () => {
+      const metadata = generatedImages.map(({ imageData, ...rest }) => rest);
+      localStorage.setItem('generatedImages', JSON.stringify(metadata));
+    };
+    saveMetadata();
   }, [generatedImages]);
 
-  const handleImageGenerated = (newImage: GeneratedImage) => {
-    setGeneratedImages((prevImages) => [newImage, ...prevImages]);
-    setCurrentImage(newImage);
+  const handleImageGenerated = async (newImage: GeneratedImage) => {
+    try {
+      await saveImage(newImage.timestamp, newImage.imageData);
+      setGeneratedImages((prevImages) => [newImage, ...prevImages]);
+      setCurrentImage(newImage);
+    } catch (error) {
+      console.error('Failed to save image:', error);
+    }
   };
 
-  const handleClearHistory = () => {
-    setGeneratedImages([]);
-    localStorage.removeItem('generatedImages');
+  const handleClearHistory = async () => {
+    try {
+      await clearImages();
+      setGeneratedImages([]);
+      localStorage.removeItem('generatedImages');
+    } catch (error) {
+      console.error('Failed to clear history:', error);
+    }
   };
 
   const handleImageClick = (image: GeneratedImage) => {
@@ -40,6 +71,14 @@ function App() {
   const handleCloseModal = () => {
     setSelectedImage(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -69,9 +108,8 @@ function App() {
                 </p>
                 <p className="mt-2 text-xs text-gray-500">
                   <strong>Settings: </strong>
-                  {currentImage.settings.model}, {currentImage.settings.steps}{' '}
-                  steps, {currentImage.settings.width}x
-                  {currentImage.settings.height}
+                  {currentImage.settings.model}, {currentImage.settings.steps} steps,{' '}
+                  {currentImage.settings.width}x{currentImage.settings.height}
                 </p>
               </>
             ) : (

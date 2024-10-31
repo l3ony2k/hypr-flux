@@ -1,5 +1,5 @@
-import React from 'react';
-import { Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { GeneratedImage } from '../types';
 
 interface ImageHistoryProps {
@@ -8,27 +8,76 @@ interface ImageHistoryProps {
   onImageClick: (image: GeneratedImage) => void;
 }
 
+const IMAGES_PER_PAGE = 50;
+
 const ImageHistory: React.FC<ImageHistoryProps> = ({
   images,
   onClearHistory,
   onImageClick,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(images.length / IMAGES_PER_PAGE);
+
+  const handleClearClick = () => {
+    if (window.confirm('Are you sure you want to clear all images? This action cannot be undone.')) {
+      onClearHistory();
+    }
+  };
+
+  const startIndex = (currentPage - 1) * IMAGES_PER_PAGE;
+  const endIndex = startIndex + IMAGES_PER_PAGE;
+  const currentImages = images.slice(startIndex, endIndex);
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">History</h2>
-        <button
-          onClick={onClearHistory}
-          className="text-red-500 hover:text-red-700 flex items-center"
-        >
-          <Trash2 size={20} className="mr-1" />
-        </button>
+        <div className="flex items-center gap-4">
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                className="p-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Previous page"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="p-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Next page"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          )}
+          <button
+            onClick={handleClearClick}
+            className="text-red-500 hover:text-red-700 flex items-center"
+            title="Clear history"
+          >
+            <Trash2 size={20} className="mr-1" />
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-        {images.map((image, index) => (
+        {currentImages.map((image, index) => (
           <div
-            key={index}
-            className="cursor-pointer"
+            key={image.timestamp}
+            className="cursor-pointer hover:opacity-90 transition-opacity"
             onClick={() => onImageClick(image)}
           >
             <img
@@ -46,6 +95,11 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
           </div>
         ))}
       </div>
+      {images.length === 0 && (
+        <div className="text-center text-gray-500 py-8">
+          No images in history
+        </div>
+      )}
     </div>
   );
 };
