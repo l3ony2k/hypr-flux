@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 import { GeneratedImage } from '../types';
+import { generateUniqueFileName } from '../utils/fileUtils';
 
 interface ImageModalProps {
   image: GeneratedImage;
@@ -23,14 +24,36 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
     };
   }, [onClose]);
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = `data:image/png;base64,${image.imageData}`;
+    link.download = generateUniqueFileName(image.prompt, image.timestamp);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div ref={modalRef} className="bg-white p-4 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-bold">Image Details</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X size={24} />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDownload}
+              className="text-blue-500 hover:text-blue-700"
+              title="Download image"
+            >
+              <Download size={24} />
+            </button>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+              title="Close"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
         <img
           src={`data:image/png;base64,${image.imageData}`}
