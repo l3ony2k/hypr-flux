@@ -1,64 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import ImageGenerator from './components/ImageGenerator';
 import ImageHistory from './components/ImageHistory';
 import ImageModal from './components/ImageModal';
 import { GeneratedImage } from './types';
-import { initDB, saveImage, getImage, clearImages } from './utils/db';
+import { DatabaseService } from './services/databaseService';
+
+const db = new DatabaseService();
 
 function App() {
+  const generatorRef = useRef<{ loadSettings: (settings: GeneratedImage['settings']) => void }>();
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const init = async () => {
+    const loadImages = async () => {
       try {
-        await initDB();
-        const savedMetadata = localStorage.getItem('generatedImages');
-        if (savedMetadata) {
-          const metadata = JSON.parse(savedMetadata);
-          const images = await Promise.all(
-            metadata.map(async (img: GeneratedImage) => {
-              const imageData = await getImage(img.timestamp);
-              return imageData ? { ...img, imageData } : null;
-            })
-          );
-          setGeneratedImages(images.filter(Boolean));
-        }
+        await db.init();
+        const images = await db.loadImages();
+        setGeneratedImages(images);
       } catch (error) {
-        console.error('Failed to initialize DB:', error);
+        console.error('Failed to load images:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    init();
-  }, []);
 
-  useEffect(() => {
-    const saveMetadata = async () => {
-      const metadata = generatedImages.map(({ imageData, ...rest }) => rest);
-      localStorage.setItem('generatedImages', JSON.stringify(metadata));
-    };
-    saveMetadata();
-  }, [generatedImages]);
+    loadImages();
+  }, []);
 
   const handleImageGenerated = async (newImage: GeneratedImage) => {
     try {
-      await saveImage(newImage.timestamp, newImage.imageData);
+      await db.saveImage(newImage);
       setGeneratedImages((prevImages) => [newImage, ...prevImages]);
       setCurrentImage(newImage);
     } catch (error) {
-      console.error('Failed to save image:', error);
+      console.error('Failed to save generated image:', error);
     }
   };
 
   const handleClearHistory = async () => {
     try {
-      await clearImages();
+      await db.clearAll();
       setGeneratedImages([]);
-      localStorage.removeItem('generatedImages');
+      setCurrentImage(null);
     } catch (error) {
       console.error('Failed to clear history:', error);
     }
@@ -70,6 +57,12 @@ function App() {
 
   const handleCloseModal = () => {
     setSelectedImage(null);
+  };
+
+  const handleLoadSettings = (settings: GeneratedImage['settings']) => {
+    if (generatorRef.current?.loadSettings) {
+      generatorRef.current.loadSettings(settings);
+    }
   };
 
   if (isLoading) {
@@ -90,7 +83,10 @@ function App() {
       <main className="px-2 space-y-2 mt-2">
         <div className="flex flex-col sm:flex-row gap-2">
           <section className="w-full sm:w-1/2 border p-2">
-            <ImageGenerator onImageGenerated={handleImageGenerated} />
+            <ImageGenerator 
+              ref={generatorRef}
+              onImageGenerated={handleImageGenerated} 
+            />
           </section>
           <section className="w-full sm:w-1/2 border p-2">
             <h2 className="text-2xl font-bold mb-2">Result</h2>
@@ -130,7 +126,11 @@ function App() {
         </section>
       </main>
       {selectedImage && (
-        <ImageModal image={selectedImage} onClose={handleCloseModal} />
+        <ImageModal 
+          image={selectedImage} 
+          onClose={handleCloseModal}
+          onLoadSettings={handleLoadSettings}
+        />
       )}
     </div>
   );

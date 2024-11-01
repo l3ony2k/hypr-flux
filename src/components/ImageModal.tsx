@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import { X, Download } from 'lucide-react';
+import { X, Download, Settings } from 'lucide-react';
 import { GeneratedImage } from '../types';
 import { generateUniqueFileName } from '../utils/fileUtils';
 
 interface ImageModalProps {
   image: GeneratedImage;
   onClose: () => void;
+  onLoadSettings: (settings: GeneratedImage['settings']) => void;
 }
 
-const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
+const ImageModal: React.FC<ImageModalProps> = ({ image, onClose, onLoadSettings }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,6 +34,11 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
     document.body.removeChild(link);
   };
 
+  const handleLoadSettings = () => {
+    onLoadSettings(image.settings);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div ref={modalRef} className="bg-white p-4 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -40,8 +46,15 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
           <h2 className="text-2xl font-bold">Image Details</h2>
           <div className="flex gap-2">
             <button
+              onClick={handleLoadSettings}
+              className="text-gray-500 hover:text-gray-700"
+              title="Use these settings"
+            >
+              <Settings size={24} />
+            </button>
+            <button
               onClick={handleDownload}
-              className="text-blue-500 hover:text-blue-700"
+              className="text-gray-500 hover:text-gray-700"
               title="Download image"
             >
               <Download size={24} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Loader } from 'lucide-react';
 import { GeneratedImage } from '../types';
 
@@ -6,22 +6,51 @@ interface ImageGeneratorProps {
   onImageGenerated: (image: GeneratedImage) => void;
 }
 
+const SETTINGS_KEY = 'hyprFluxSettings';
+
 const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   onImageGenerated,
 }) => {
   const [apiKey, setApiKey] = useState(
-    import.meta.env.VITE_HYPRLAB_API_KEY || ''
+    localStorage.getItem('hyprFluxApiKey') || import.meta.env.VITE_HYPRLAB_API_KEY || ''
   );
   const [prompt, setPrompt] = useState('');
-  const [steps, setSteps] = useState(20);
-  const [height, setHeight] = useState(1024);
-  const [width, setWidth] = useState(1024);
-  const [model, setModel] = useState('flux-1.1-pro');
-  const [customModel, setCustomModel] = useState('');
+  const [steps, setSteps] = useState(() => 
+    Number(localStorage.getItem('hyprFluxSteps')) || 20
+  );
+  const [height, setHeight] = useState(() =>
+    Number(localStorage.getItem('hyprFluxHeight')) || 1024
+  );
+  const [width, setWidth] = useState(() =>
+    Number(localStorage.getItem('hyprFluxWidth')) || 1024
+  );
+  const [model, setModel] = useState(
+    localStorage.getItem('hyprFluxModel') || 'flux-1.1-pro'
+  );
+  const [customModel, setCustomModel] = useState(
+    localStorage.getItem('hyprFluxCustomModel') || ''
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const models = ['custom', ...(import.meta.env.VITE_HYPRLAB_MODELS || '').split(',')];
+
+  // Cache settings when they change
+  useEffect(() => {
+    localStorage.setItem('hyprFluxApiKey', apiKey);
+    localStorage.setItem('hyprFluxSteps', steps.toString());
+    localStorage.setItem('hyprFluxHeight', height.toString());
+    localStorage.setItem('hyprFluxWidth', width.toString());
+    localStorage.setItem('hyprFluxModel', model);
+    localStorage.setItem('hyprFluxCustomModel', customModel);
+  }, [apiKey, steps, height, width, model, customModel]);
+
+  const loadSettings = (settings: GeneratedImage['settings']) => {
+    setModel(settings.model);
+    setSteps(settings.steps);
+    setHeight(settings.height);
+    setWidth(settings.width);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,4 +253,9 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({
   );
 };
 
+// Export both the component and the loadSettings function
 export default ImageGenerator;
+export type { ImageGeneratorProps };
+// Add this line to export the loadSettings functionality
+export { type LoadSettingsFunction };
+type LoadSettingsFunction = (settings: GeneratedImage['settings']) => void;
