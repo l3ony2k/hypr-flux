@@ -39,6 +39,20 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose, onLoadSettings 
     onClose();
   };
 
+  const renderSettingValue = (key: string, value: any) => {
+    if (key === 'model') return value;
+    if (key === 'prompt') return value;
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (typeof value === 'number') return value.toString();
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) return value.join(', ');
+    return JSON.stringify(value);
+  };
+
+  const getSettingLabel = (key: string): string => {
+    return key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div ref={modalRef} className="bg-white p-4 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -74,28 +88,22 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose, onLoadSettings 
           className="w-full h-auto object-contain mb-4"
         />
         <div className="space-y-2">
-          <table className="border min-w-full table-auto border-collapse bg-white overflow-hidden">
+          <table className="min-w-full table-auto border-collapse bg-white">
             <tbody>
+              {Object.entries(image.settings).map(([key, value]) => (
+                <tr key={key} className="border-b">
+                  <td className="p-2 align-top font-semibold bg-gray-100 w-1/4">
+                    {getSettingLabel(key)}:
+                  </td>
+                  <td className="p-2 align-top">
+                    {renderSettingValue(key, value)}
+                  </td>
+                </tr>
+              ))}
               <tr className="border-b">
-                <td className="p-2 align-top font-semibold bg-gray-100">Prompt:</td>
-                <td className="p-2 align-top">{image.prompt}</td>
-              </tr>
-              <tr className="border-b">
-                <td className="p-2 align-top font-semibold bg-gray-100">Model:</td>
-                <td className="p-2 align-top">{image.settings.model}</td>
-              </tr>
-              <tr className="border-b">
-                <td className="p-2 align-top font-semibold bg-gray-100">Steps:</td>
-                <td className="p-2 align-top">{image.settings.steps}</td>
-              </tr>
-              <tr className="border-b">
-                <td className="p-2 align-top font-semibold bg-gray-100">Dimensions:</td>
-                <td className="p-2 align-top">
-                  {image.settings.width}x{image.settings.height}
+                <td className="p-2 align-top font-semibold bg-gray-100 w-1/4">
+                  Generated:
                 </td>
-              </tr>
-              <tr>
-                <td className="p-2 align-top font-semibold bg-gray-100">Generated:</td>
                 <td className="p-2 align-top">
                   {new Date(image.timestamp).toLocaleString()}
                 </td>

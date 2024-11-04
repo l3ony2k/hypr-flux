@@ -157,7 +157,7 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
         />
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 flex-grow flex flex-col mt-4"
+          className="space-y-2 flex-grow flex flex-col mt-2"
         >
           <div>
             <label

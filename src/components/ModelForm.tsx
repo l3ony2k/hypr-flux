@@ -1,5 +1,5 @@
-import React from 'react';
-import { modelConfigs, Field } from '../config/models';
+import React, { useEffect } from 'react';
+import { modelFamilies, type Field } from '../config/models';
 
 interface ModelFormProps {
   modelId: string;
@@ -8,8 +8,29 @@ interface ModelFormProps {
 }
 
 const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
-  const config = modelConfigs[modelId];
-  if (!config) return null;
+  const modelConfig = modelFamilies
+    .flatMap((family) => family.models)
+    .find(
+      (model) =>
+        model.id === modelId ||
+        model.fields.some(
+          (field) =>
+            field.type === 'select' &&
+            field.name === 'model' &&
+            field.options?.includes(modelId)
+        )
+    );
+
+  if (!modelConfig) return null;
+
+  // Initialize values with defaults on load or model change
+  useEffect(() => {
+    modelConfig.fields.forEach((field) => {
+      if (field.default !== undefined && values[field.name] === undefined) {
+        onChange(field.name, field.default);
+      }
+    });
+  }, [modelConfig, onChange, values]);
 
   const renderField = (field: Field) => {
     const value = values[field.name] ?? field.default ?? '';
@@ -46,7 +67,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
 
       case 'range':
         return (
-          <div className="space-y-1">
+          <div className="flex items-center gap-4">
             <input
               type="range"
               id={field.name}
@@ -55,11 +76,11 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
               min={field.min}
               max={field.max}
               step={field.step}
-              className="block w-full"
+              className="flex-grow"
             />
-            <div className="text-sm text-gray-500">
-              Current value: {value}
-            </div>
+            <span className="text-sm text-gray-500 w-12 text-right">
+              {value}
+            </span>
           </div>
         );
 
@@ -79,8 +100,8 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
   };
 
   return (
-    <div className="space-y-4">
-      {config.fields.map((field) => (
+    <div className="space-y-2">
+      {modelConfig.fields.map((field) => (
         <div key={field.name}>
           <label
             htmlFor={field.name}

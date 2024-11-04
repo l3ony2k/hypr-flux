@@ -12,7 +12,9 @@ function App() {
   const generatorRef = useRef<ImageGeneratorRef>(null);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
-  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
+  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -65,10 +67,14 @@ function App() {
     }
   };
 
+  const getSettingLabel = (key: string): string => {
+    return key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-32 w-32 border-b-2 border-gray-900"></div>
+        <div className="animate-spin h-12 w-12 rounded-full border-4 border-gray-900 border-t-transparent"></div>
       </div>
     );
   }
@@ -77,15 +83,15 @@ function App() {
     <div className="min-h-screen bg-white">
       <header className="p-4 border-b">
         <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-          <ImageIcon className="mr-2" /> Hypr Flux
+          <ImageIcon className="mr-2" /> Hypr Image
         </h1>
       </header>
       <main className="px-2 space-y-2 mt-2">
         <div className="flex flex-col sm:flex-row gap-2">
           <section className="w-full sm:w-1/2 border p-2">
-            <ImageGenerator 
+            <ImageGenerator
               ref={generatorRef}
-              onImageGenerated={handleImageGenerated} 
+              onImageGenerated={handleImageGenerated}
             />
           </section>
           <section className="w-full sm:w-1/2 border p-2">
@@ -104,8 +110,10 @@ function App() {
                 </p>
                 <p className="mt-2 text-xs text-gray-500">
                   <strong>Settings: </strong>
-                  {currentImage.settings.model}, {currentImage.settings.steps} steps,{' '}
-                  {currentImage.settings.width}x{currentImage.settings.height}
+                  {Object.entries(currentImage.settings)
+                    .filter(([key]) => key !== 'prompt') // Exclude 'prompt' from the output
+                    .map(([key, value]) => `${getSettingLabel(key)}: ${value}`)
+                    .join(', ')}
                 </p>
               </>
             ) : (
@@ -126,8 +134,8 @@ function App() {
         </section>
       </main>
       {selectedImage && (
-        <ImageModal 
-          image={selectedImage} 
+        <ImageModal
+          image={selectedImage}
           onClose={handleCloseModal}
           onLoadSettings={handleLoadSettings}
         />
