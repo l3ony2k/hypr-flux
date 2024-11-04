@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
-import ImageGenerator from './components/ImageGenerator';
+import ImageGenerator, { ImageGeneratorRef } from './components/ImageGenerator';
 import ImageHistory from './components/ImageHistory';
 import ImageModal from './components/ImageModal';
 import { GeneratedImage } from './types';
@@ -9,7 +9,7 @@ import { DatabaseService } from './services/databaseService';
 const db = new DatabaseService();
 
 function App() {
-  const generatorRef = useRef<{ loadSettings: (settings: GeneratedImage['settings']) => void }>();
+  const generatorRef = useRef<ImageGeneratorRef>(null);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
@@ -60,7 +60,7 @@ function App() {
   };
 
   const handleLoadSettings = (settings: GeneratedImage['settings']) => {
-    if (generatorRef.current?.loadSettings) {
+    if (generatorRef.current) {
       generatorRef.current.loadSettings(settings);
     }
   };
