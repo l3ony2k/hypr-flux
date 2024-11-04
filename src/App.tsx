@@ -17,6 +17,14 @@ function App() {
   );
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize darkMode based on the system preference
+  const [darkMode, setDarkMode] = useState(() => {
+    return (
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+  });
+
   useEffect(() => {
     const loadImages = async () => {
       try {
@@ -32,6 +40,27 @@ function App() {
 
     loadImages();
   }, []);
+
+  // Apply Dark Reader based on the darkMode state
+  useEffect(() => {
+    if (window.DarkReader) {
+      if (darkMode) {
+        window.DarkReader.enable({
+          darkSchemeBackgroundColor: '#191919',
+          darkSchemeTextColor: '#fafafa',
+          scrollbarColor: '',
+          selectionColor: 'auto',
+        });
+      } else {
+        window.DarkReader.disable();
+      }
+    }
+  }, [darkMode]);
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode((prevMode) => !prevMode);
+  };
 
   const handleImageGenerated = async (newImage: GeneratedImage) => {
     try {
@@ -81,10 +110,17 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="p-4 border-b">
-        <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+      <header className="p-4 border-b flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-black flex items-center">
           <ImageIcon className="mr-2" /> Hypr Image
         </h1>
+        {/* Dark mode toggle button */}
+        <button
+          onClick={toggleDarkMode}
+          className="bg-gray-200 px-2 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
+        >
+          {darkMode ? 'Light' : 'Dark'}
+        </button>
       </header>
       <main className="px-2 space-y-2 mt-2">
         <div className="flex flex-col sm:flex-row gap-2">
