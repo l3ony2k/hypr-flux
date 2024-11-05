@@ -110,7 +110,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="p-2 border-b flex justify-between items-center bg-white sticky top-0">
+      <header className="p-2 border-b flex justify-between items-center bg-white sticky top-0 z-50">
         <h1 className="text-3xl font-bold text-black flex items-center leading-none">
           <svg
             className="h-6 w-6 mx-2"

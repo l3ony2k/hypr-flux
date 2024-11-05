@@ -56,7 +56,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
         ref={modalRef}
         className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto"
       >
-        <div className="flex justify-between items-center mb-2 border-b bg-white sticky top-0">
+        <div className="flex justify-between items-center mb-2 border-b bg-white sticky top-0 z-50">
           <h2 className="text-2xl font-bold px-4">Image Details</h2>
           <div className="flex p-2">
             <button
