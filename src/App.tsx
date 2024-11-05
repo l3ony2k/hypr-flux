@@ -111,8 +111,13 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       <header className="p-4 border-b flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-black flex items-center">
-          <ImageIcon className="mr-2" /> Hypr Image
+        <h1 className="text-3xl font-bold text-black flex items-center leading-none">
+          <img
+            className="mr-2 h-8 align-middle"
+            src="https://chat.hyprlab.io/assets/hyprlab_v2_icon.png"
+            alt="Hyprlab Icon"
+          />
+          <span className="flex items-center"> - Image Generation</span>
         </h1>
         {/* Dark mode toggle button */}
         <button

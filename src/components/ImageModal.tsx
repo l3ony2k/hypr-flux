@@ -90,16 +90,32 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose, onLoadSettings 
         <div className="space-y-2">
           <table className="min-w-full table-auto border-collapse bg-white">
             <tbody>
-              {Object.entries(image.settings).map(([key, value]) => (
-                <tr key={key} className="border-b">
+              <tr className="border-b">
+                <td className="p-2 align-top font-semibold bg-gray-100 w-1/4">
+                  Prompt:
+                </td>
+                <td className="p-2 align-top">{image.prompt}</td>
+              </tr>
+              {image.revised_prompt && (
+                <tr className="border-b">
                   <td className="p-2 align-top font-semibold bg-gray-100 w-1/4">
-                    {getSettingLabel(key)}:
+                    Revised Prompt:
                   </td>
-                  <td className="p-2 align-top">
-                    {renderSettingValue(key, value)}
-                  </td>
+                  <td className="p-2 align-top">{image.revised_prompt}</td>
                 </tr>
-              ))}
+              )}
+              {Object.entries(image.settings)
+                .filter(([key]) => key !== 'prompt')
+                .map(([key, value]) => (
+                  <tr key={key} className="border-b">
+                    <td className="p-2 align-top font-semibold bg-gray-100 w-1/4">
+                      {getSettingLabel(key)}:
+                    </td>
+                    <td className="p-2 align-top">
+                      {renderSettingValue(key, value)}
+                    </td>
+                  </tr>
+                ))}
               <tr className="border-b">
                 <td className="p-2 align-top font-semibold bg-gray-100 w-1/4">
                   Generated:

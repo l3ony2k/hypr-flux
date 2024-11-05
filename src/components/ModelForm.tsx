@@ -32,6 +32,16 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
     });
   }, [modelConfig, onChange, values]);
 
+  // Filter fields based on the selected model version
+  const getVisibleFields = () => {
+    return modelConfig.fields.filter((field) => {
+      // If showFor is not defined, show the field for all models
+      if (!field.showFor) return true;
+      // If showFor is defined, only show for specified models
+      return field.showFor.includes(values.model || modelId);
+    });
+  };
+
   const renderField = (field: Field) => {
     const value = values[field.name] ?? field.default ?? '';
 
@@ -39,7 +49,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
       case 'textarea':
         return (
           <textarea
-            id={field.name}
+            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
             value={value}
             onChange={(e) => onChange(field.name, e.target.value)}
             required={field.required}
@@ -51,7 +61,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
       case 'select':
         return (
           <select
-            id={field.name}
+            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
             value={value}
             onChange={(e) => onChange(field.name, e.target.value)}
             required={field.required}
@@ -70,7 +80,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
           <div className="flex items-center gap-4">
             <input
               type="range"
-              id={field.name}
+              id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
               value={value}
               onChange={(e) => onChange(field.name, Number(e.target.value))}
               min={field.min}
@@ -84,11 +94,25 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
           </div>
         );
 
+      case 'number':
+        return (
+          <input
+            type="number"
+            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+            value={value}
+            onChange={(e) => onChange(field.name, Number(e.target.value))}
+            min={field.min}
+            max={field.max}
+            required={field.required}
+            className="block w-full border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+          />
+        );
+
       default:
         return (
           <input
             type={field.type}
-            id={field.name}
+            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
             value={value}
             onChange={(e) => onChange(field.name, e.target.value)}
             required={field.required}
@@ -101,10 +125,10 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
 
   return (
     <div className="space-y-2">
-      {modelConfig.fields.map((field) => (
-        <div key={field.name}>
+      {getVisibleFields().map((field) => (
+        <div key={`${field.name}-${field.showFor?.join('-') || 'all'}`}>
           <label
-            htmlFor={field.name}
+            htmlFor={`${field.name}-${field.showFor?.join('-') || 'all'}`}
             className="block text-sm font-medium text-gray-700"
           >
             {field.label}

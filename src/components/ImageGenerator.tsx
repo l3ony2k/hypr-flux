@@ -35,13 +35,13 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
         setFormValues(JSON.parse(savedValues));
       } else {
         // Initialize with default values from model config
-        const defaults: Record<string, any> = {};
         const selectedConfig = modelFamilies.find((family) =>
           family.models.some((model) => model.id === selectedModel)
         );
         const modelConfig = selectedConfig?.models.find(
           (model) => model.id === selectedModel
         );
+        const defaults: Record<string, any> = {};
         modelConfig?.fields.forEach((field) => {
           if (field.default !== undefined) {
             defaults[field.name] = field.default;
@@ -81,10 +81,38 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
 
     const handleModelSelect = (modelId: string) => {
       setSelectedModel(modelId);
+      // Reset form values when model changes
+      setFormValues({ model: modelId });
     };
 
     const handleFormChange = (name: string, value: any) => {
-      setFormValues((prev) => ({ ...prev, [name]: value }));
+      setFormValues((prev) => {
+        const newValues = { ...prev, [name]: value };
+        // If model changed, clear values that aren't applicable to the new model
+        if (name === 'model') {
+          const modelFields = modelFamilies
+            .flatMap((family) => family.models)
+            .find((model) =>
+              model.fields.some(
+                (field) =>
+                  field.type === 'select' &&
+                  field.name === 'model' &&
+                  field.options?.includes(value)
+              )
+            )
+            ?.fields.filter(
+              (field) => !field.showFor || field.showFor.includes(value)
+            )
+            .map((field) => field.name);
+
+          Object.keys(newValues).forEach((key) => {
+            if (!modelFields?.includes(key) && key !== 'model') {
+              delete newValues[key];
+            }
+          });
+        }
+        return newValues;
+      });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -93,30 +121,32 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
       setError('');
 
       try {
+        const currentModel = formValues.model || selectedModel;
         const requestBody = {
           ...formValues,
-          model: selectedModel,
+          model: currentModel,
           response_format: 'b64_json',
           output_format: 'png',
         };
 
         // Validate request body against model schema
-        const modelSchema = modelValidations[selectedModel];
+        const modelSchema = modelValidations[currentModel];
         if (modelSchema) {
           modelSchema.parse(requestBody);
         }
 
-        const response = await fetch(
-          'https://api.hyprlab.io/v1/images/generations',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify(requestBody),
-          }
-        );
+        const apiEndpoint = 'https://api.hyprlab.io/v1/images/generations';
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        };
+
+        const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(requestBody),
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -127,8 +157,9 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
         const newImage: GeneratedImage = {
           imageData: data.data[0].b64_json,
           prompt: formValues.prompt,
+          revised_prompt: data.data[0].revised_prompt,
           settings: {
-            model: selectedModel,
+            model: currentModel,
             ...formValues,
           },
           timestamp: new Date().toISOString(),
@@ -152,7 +183,7 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
           Image Settings
         </h2>
         <ModelTabs
-          selectedModel={selectedModel}
+          selectedModel={formValues.model || selectedModel}
           onModelSelect={handleModelSelect}
         />
         <form
@@ -173,12 +204,12 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
               onChange={(e) => setApiKey(e.target.value)}
               required
               className="block w-full border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-              placeholder="Enter your HyprLab API key"
+              placeholder="Enter your API key"
             />
           </div>
           <div className="flex-grow">
             <ModelForm
-              modelId={selectedModel}
+              modelId={formValues.model || selectedModel}
               values={formValues}
               onChange={handleFormChange}
             />

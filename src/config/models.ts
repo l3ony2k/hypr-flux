@@ -84,6 +84,19 @@ export const modelValidations = {
       ])
       .optional(),
   }),
+  'dall-e-3': z.object({
+    ...baseValidation,
+    model: z.literal('dall-e-3'),
+    size: z.enum(['1024x1024', '1792x1024', '1024x1792']),
+    quality: z.enum(['standard', 'hd']).optional(),
+    style: z.enum(['vivid', 'natural']).optional(),
+  }),
+  'dall-e-2': z.object({
+    ...baseValidation,
+    model: z.literal('dall-e-2'),
+    size: z.enum(['256x256', '512x512', '1024x1024']),
+    n: z.number().min(1).max(10).optional(),
+  }),
   'ideogram-v2': z.object({
     ...baseValidation,
     model: z.literal('ideogram-v2'),
@@ -132,14 +145,6 @@ export const modelValidations = {
       .optional(),
     magic_prompt_option: z.enum(['Auto', 'On', 'Off']).optional(),
   }),
-  'dall-e-3': z.object({
-    ...baseValidation,
-    model: z.literal('dall-e-3'),
-    // n: z.literal(1),
-    quality: z.enum(['standard', 'hd']).optional(),
-    size: z.enum(['1024x1024', '1792x1024', '1024x1792']),
-    style: z.enum(['vivid', 'natural']).optional(),
-  }),
 };
 
 export type ModelConfig = {
@@ -159,6 +164,7 @@ export type Field = {
   max?: number;
   step?: number;
   default?: any;
+  showFor?: string[]; // New field to control visibility based on model version
 };
 
 export type ModelFamily = {
@@ -212,62 +218,6 @@ const fluxCommonFields = [
   },
 ];
 
-// Common fields for Ideogram models
-const ideogramCommonFields = [
-  {
-    name: 'model',
-    type: 'select',
-    label: 'Model Version',
-    required: true,
-    options: ['ideogram-v2', 'ideogram-v2-turbo'],
-    default: 'ideogram-v2',
-  },
-  {
-    name: 'prompt',
-    type: 'textarea',
-    label: 'Prompt',
-    required: true,
-  },
-  {
-    name: 'negative_prompt',
-    type: 'textarea',
-    label: 'Negative Prompt',
-  },
-  {
-    name: 'aspect_ratio',
-    type: 'select',
-    label: 'Aspect Ratio',
-    options: [
-      '1:1',
-      '16:9',
-      '9:16',
-      '4:3',
-      '3:4',
-      '3:2',
-      '2:3',
-      '16:10',
-      '10:16',
-      '3:1',
-      '1:3',
-    ],
-    default: '1:1',
-  },
-  {
-    name: 'style_type',
-    type: 'select',
-    label: 'Style Type',
-    options: ['Auto', 'General', 'Realistic', 'Design', 'Render 3D', 'Anime'],
-    default: 'Auto',
-  },
-  {
-    name: 'magic_prompt_option',
-    type: 'select',
-    label: 'Magic Prompt',
-    options: ['Auto', 'On', 'Off'],
-    default: 'Auto',
-  },
-];
-
 export const modelFamilies: ModelFamily[] = [
   {
     id: 'flux',
@@ -288,10 +238,18 @@ export const modelFamilies: ModelFamily[] = [
     description: 'Advanced AI image generation with multiple style options',
     models: [
       {
-        id: 'recraft-v3',
-        name: 'Recraft V3',
-        description: 'Latest version of Recraft AI',
+        id: 'recraft',
+        name: 'Recraft',
+        description: 'Recraft model family',
         fields: [
+          {
+            name: 'model',
+            type: 'select',
+            label: 'Model Version',
+            required: true,
+            options: ['recraft-v3'],
+            default: 'recraft-v3',
+          },
           {
             name: 'prompt',
             type: 'textarea',
@@ -357,28 +315,23 @@ export const modelFamilies: ModelFamily[] = [
     ],
   },
   {
-    id: 'ideogram',
-    name: 'Ideogram',
-    description: 'Versatile image generation with advanced style control',
-    models: [
-      {
-        id: 'ideogram',
-        name: 'Ideogram',
-        description: 'Ideogram model family',
-        fields: ideogramCommonFields,
-      },
-    ],
-  },
-  {
     id: 'dalle',
     name: 'DALL·E',
     description: "OpenAI's advanced image generation models",
     models: [
       {
-        id: 'dall-e-3',
-        name: 'DALL·E 3',
-        description: 'Latest version of DALL·E',
+        id: 'dalle',
+        name: 'DALL·E',
+        description: 'DALL·E model family',
         fields: [
+          {
+            name: 'model',
+            type: 'select',
+            label: 'Model Version',
+            required: true,
+            options: ['dall-e-3', 'dall-e-2'],
+            default: 'dall-e-3',
+          },
           {
             name: 'prompt',
             type: 'textarea',
@@ -389,7 +342,18 @@ export const modelFamilies: ModelFamily[] = [
             name: 'size',
             type: 'select',
             label: 'Size',
+            required: true,
             options: ['1024x1024', '1792x1024', '1024x1792'],
+            showFor: ['dall-e-3'],
+            default: '1024x1024',
+          },
+          {
+            name: 'size',
+            type: 'select',
+            label: 'Size',
+            required: true,
+            options: ['256x256', '512x512', '1024x1024'],
+            showFor: ['dall-e-2'],
             default: '1024x1024',
           },
           {
@@ -397,14 +361,98 @@ export const modelFamilies: ModelFamily[] = [
             type: 'select',
             label: 'Quality',
             options: ['standard', 'hd'],
-            default: 'hd',
+            showFor: ['dall-e-3'],
+            default: 'standard',
           },
           {
             name: 'style',
             type: 'select',
             label: 'Style',
             options: ['vivid', 'natural'],
-            default: 'natural',
+            showFor: ['dall-e-3'],
+            default: 'vivid',
+          },
+          {
+            name: 'n',
+            type: 'number',
+            label: 'Number of Images',
+            min: 1,
+            max: 10,
+            showFor: ['dall-e-2'],
+            default: 1,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ideogram',
+    name: 'Ideogram',
+    description: 'Versatile image generation with advanced style control',
+    models: [
+      {
+        id: 'ideogram',
+        name: 'Ideogram',
+        description: 'Ideogram model family with multiple versions',
+        fields: [
+          {
+            name: 'model',
+            type: 'select',
+            label: 'Model Version',
+            required: true,
+            options: ['ideogram-v2', 'ideogram-v2-turbo'],
+            default: 'ideogram-v2',
+          },
+          {
+            name: 'prompt',
+            type: 'textarea',
+            label: 'Prompt',
+            required: true,
+          },
+          {
+            name: 'negative_prompt',
+            type: 'textarea',
+            label: 'Negative Prompt',
+          },
+          {
+            name: 'aspect_ratio',
+            type: 'select',
+            label: 'Aspect Ratio',
+            options: [
+              '1:1',
+              '16:9',
+              '9:16',
+              '4:3',
+              '3:4',
+              '3:2',
+              '2:3',
+              '16:10',
+              '10:16',
+              '3:1',
+              '1:3',
+            ],
+            default: '1:1',
+          },
+          {
+            name: 'style_type',
+            type: 'select',
+            label: 'Style Type',
+            options: [
+              'Auto',
+              'General',
+              'Realistic',
+              'Design',
+              'Render 3D',
+              'Anime',
+            ],
+            default: 'Auto',
+          },
+          {
+            name: 'magic_prompt_option',
+            type: 'select',
+            label: 'Magic Prompt',
+            options: ['Auto', 'On', 'Off'],
+            default: 'Auto',
           },
         ],
       },
