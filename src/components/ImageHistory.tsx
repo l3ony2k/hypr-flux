@@ -52,7 +52,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
   };
 
   return (
-    <div className="max-h-[calc(100vh-64px)] overflow-y-auto">
+    <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">History</h2>
         <div className="flex items-center gap-4">
