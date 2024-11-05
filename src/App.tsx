@@ -5,6 +5,7 @@ import ImageHistory from './components/ImageHistory';
 import ImageModal from './components/ImageModal';
 import { GeneratedImage } from './types';
 import { DatabaseService } from './services/databaseService';
+import favicon from "/public/favicon.svg";
 
 const db = new DatabaseService();
 
@@ -112,25 +113,7 @@ function App() {
     <div className="min-h-screen bg-white">
       <header className="p-2 border-b flex justify-between items-center bg-white sticky top-0 z-50">
         <h1 className="text-3xl font-bold text-black flex items-center leading-none">
-          <svg
-            className="h-6 w-6 mx-2"
-            xmlns="http://www.w3.org/2000/svg"
-            width="512"
-            height="512"
-            fill="none"
-            viewBox="0 0 512 512"
-          >
-            <g clip-path="url(#a)">
-              <path
-                fill="#964DC2"
-                d="M345.014 0H512v512H345.014c0-57.65.672-115.275 1.38-172.918-51.267-.325-103.67 2.716-142.987 39.878-35.121 34.579-36.42 84.54-36.42 133.04H0c0-97.646 20.771-184.077 92.757-254.6 66.142-63.237 162.479-84.482 252.257-84.482V0Z"
-              />
-              <path
-                fill="#4F3F98"
-                d="M0 0h165v170.256C95.588 204.438 32.734 255.969 0 327V0Z"
-              />
-            </g>
-          </svg>
+          <img src={favicon} alt="Favicon" className="h-6 w-6 mx-2" />
           <span className="flex items-center mb-1"> - Image Generation</span>
         </h1>
         <div>
