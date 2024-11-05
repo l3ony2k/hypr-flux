@@ -9,7 +9,7 @@ interface ImageHistoryProps {
   onImageClick: (image: GeneratedImage) => void;
 }
 
-const IMAGES_PER_PAGE = 50;
+const IMAGES_PER_PAGE = 60;
 
 const ImageHistory: React.FC<ImageHistoryProps> = ({
   images,
@@ -88,7 +88,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 xl:grid-cols-10 gap-2">
         {currentImages.map((image) => (
           <div
             key={image.timestamp}
