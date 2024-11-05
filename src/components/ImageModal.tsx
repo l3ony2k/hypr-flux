@@ -1,20 +1,22 @@
 import React, { useEffect, useRef } from 'react';
-import { X, Download, Settings } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 import { GeneratedImage } from '../types';
 import { generateUniqueFileName } from '../utils/fileUtils';
 
 interface ImageModalProps {
   image: GeneratedImage;
   onClose: () => void;
-  onLoadSettings: (settings: GeneratedImage['settings']) => void;
 }
 
-const ImageModal: React.FC<ImageModalProps> = ({ image, onClose, onLoadSettings }) => {
+const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -34,11 +36,6 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose, onLoadSettings 
     document.body.removeChild(link);
   };
 
-  const handleLoadSettings = () => {
-    onLoadSettings(image.settings);
-    onClose();
-  };
-
   const renderSettingValue = (key: string, value: any) => {
     if (key === 'model') return value;
     if (key === 'prompt') return value;
@@ -55,27 +52,23 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose, onLoadSettings 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div ref={modalRef} className="bg-white p-4 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold">Image Details</h2>
-          <div className="flex gap-2">
-            <button
-              onClick={handleLoadSettings}
-              className="text-gray-500 hover:text-gray-700"
-              title="Use these settings"
-            >
-              <Settings size={24} />
-            </button>
+      <div
+        ref={modalRef}
+        className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="flex justify-between items-center mb-2 border-b bg-white sticky top-0">
+          <h2 className="text-2xl font-bold px-4">Image Details</h2>
+          <div className="flex p-2">
             <button
               onClick={handleDownload}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:bg-gray-200 p-2"
               title="Download image"
             >
               <Download size={24} />
             </button>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:bg-gray-200 p-2"
               title="Close"
             >
               <X size={24} />

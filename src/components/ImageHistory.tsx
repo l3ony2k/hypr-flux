@@ -102,7 +102,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
             />
             <button
               onClick={(e) => handleDownload(e, image)}
-              className="absolute top-2 right-2 p-1 bg-white bg-opacity-75 hover:bg-opacity-100 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 p-1 bg-gray-200 bg-opacity-75 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
               title="Download image"
             >
               <Download size={16} />

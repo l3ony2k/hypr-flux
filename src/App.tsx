@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, Moon, Sun, Info } from 'lucide-react';
 import ImageGenerator, { ImageGeneratorRef } from './components/ImageGenerator';
 import ImageHistory from './components/ImageHistory';
 import ImageModal from './components/ImageModal';
@@ -110,22 +110,30 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="p-4 border-b flex justify-between items-center">
+      <header className="p-2 border-b flex justify-between items-center bg-white sticky top-0">
         <h1 className="text-3xl font-bold text-black flex items-center leading-none">
           <img
             className="mr-2 h-8 align-middle"
             src="https://chat.hyprlab.io/assets/hyprlab_v2_icon.png"
             alt="Hyprlab Icon"
           />
-          <span className="flex items-center"> - Image Generation</span>
+          <span className="flex items-center mb-1"> - Image Generation</span>
         </h1>
-        {/* Dark mode toggle button */}
-        <button
-          onClick={toggleDarkMode}
-          className="bg-gray-200 px-2 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300"
-        >
-          {darkMode ? 'Light' : 'Dark'}
-        </button>
+        <div>
+          {/* Dark mode toggle button */}
+          <button
+            onClick={toggleDarkMode}
+            className="px-2 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+          >
+            {darkMode ? <Sun /> : <Moon />}
+          </button>
+          <button
+            onClick={toggleDarkMode}
+            className="px-2 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
+          >
+            <Info />
+          </button>
+        </div>
       </header>
       <main className="px-2 space-y-2 mt-2">
         <div className="flex flex-col sm:flex-row gap-2">
