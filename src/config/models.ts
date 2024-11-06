@@ -95,7 +95,6 @@ export const modelValidations = {
     ...baseValidation,
     model: z.literal('dall-e-2'),
     size: z.enum(['256x256', '512x512', '1024x1024']),
-    n: z.number().min(1).max(10).optional(),
   }),
   'ideogram-v2': z.object({
     ...baseValidation,
@@ -371,15 +370,6 @@ export const modelFamilies: ModelFamily[] = [
             options: ['vivid', 'natural'],
             showFor: ['dall-e-3'],
             default: 'vivid',
-          },
-          {
-            name: 'n',
-            type: 'number',
-            label: 'Number of Images',
-            min: 1,
-            max: 10,
-            showFor: ['dall-e-2'],
-            default: 1,
           },
         ],
       },
