@@ -16,6 +16,24 @@ const fluxModelFields = {
 
 // Model-specific validation schemas
 export const modelValidations = {
+  'flux-1.1-pro-ultra': z.object({
+    ...baseValidation,
+    model: z.literal('flux-1.1-pro-ultra'),
+    aspect_ratio: z.enum([
+      '21:9',
+      '16:9',
+      '3:2',
+      '4:3',
+      '5:4',
+      '1:1',
+      '4:5',
+      '3:4',
+      '2:3',
+      '9:16',
+      '9:21',
+    ]).optional(),
+    raw: z.boolean().optional(),
+  }),
   'flux-1.1-pro': z.object({
     ...baseValidation,
     model: z.literal('flux-1.1-pro'),
@@ -155,7 +173,7 @@ export type ModelConfig = {
 
 export type Field = {
   name: string;
-  type: 'text' | 'number' | 'select' | 'range' | 'textarea';
+  type: 'text' | 'number' | 'select' | 'range' | 'textarea' | 'checkbox';
   label: string;
   required?: boolean;
   options?: string[];
@@ -180,7 +198,7 @@ const fluxCommonFields = [
     type: 'select',
     label: 'Model Version',
     required: true,
-    options: ['flux-1.1-pro', 'flux-pro', 'flux-dev', 'flux-schnell'],
+    options: ['flux-1.1-pro-ultra', 'flux-1.1-pro', 'flux-pro', 'flux-dev', 'flux-schnell'],
     default: 'flux-1.1-pro',
   },
   {
@@ -196,6 +214,7 @@ const fluxCommonFields = [
     min: 1,
     max: 50,
     default: 20,
+    showFor: ['flux-1.1-pro', 'flux-pro', 'flux-dev', 'flux-schnell'],
   },
   {
     name: 'height',
@@ -205,6 +224,7 @@ const fluxCommonFields = [
     max: 1440,
     step: 32,
     default: 1024,
+    showFor: ['flux-1.1-pro', 'flux-pro', 'flux-dev', 'flux-schnell'],
   },
   {
     name: 'width',
@@ -214,6 +234,34 @@ const fluxCommonFields = [
     max: 1440,
     step: 32,
     default: 1024,
+    showFor: ['flux-1.1-pro', 'flux-pro', 'flux-dev', 'flux-schnell'],
+  },
+  {
+    name: 'aspect_ratio',
+    type: 'select',
+    label: 'Aspect Ratio',
+    options: [
+      '21:9',
+      '16:9',
+      '3:2',
+      '4:3',
+      '5:4',
+      '1:1',
+      '4:5',
+      '3:4',
+      '2:3',
+      '9:16',
+      '9:21',
+    ],
+    default: '1:1',
+    showFor: ['flux-1.1-pro-ultra'],
+  },
+  {
+    name: 'raw',
+    type: 'checkbox',
+    label: 'Raw Output',
+    default: false,
+    showFor: ['flux-1.1-pro-ultra'],
   },
 ];
 

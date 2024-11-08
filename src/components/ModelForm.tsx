@@ -77,7 +77,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
 
       case 'range':
         return (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <input
               type="range"
               id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
@@ -91,6 +91,26 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
             <span className="text-sm text-gray-500 w-12 text-right">
               {value}
             </span>
+          </div>
+        );
+
+      case 'checkbox':
+        return (
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+              className="text-sm font-medium text-gray-700"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500">*</span>}
+            </label>
+            <input
+              type="checkbox"
+              id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+              checked={value}
+              onChange={(e) => onChange(field.name, e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+            />
           </div>
         );
 
@@ -127,13 +147,15 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
     <div className="space-y-2">
       {getVisibleFields().map((field) => (
         <div key={`${field.name}-${field.showFor?.join('-') || 'all'}`}>
-          <label
-            htmlFor={`${field.name}-${field.showFor?.join('-') || 'all'}`}
-            className="block text-sm font-medium text-gray-700"
-          >
-            {field.label}
-            {field.required && <span className="text-red-500">*</span>}
-          </label>
+          {field.type !== 'checkbox' && (
+            <label
+              htmlFor={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+              className="block text-sm font-medium text-gray-700"
+            >
+              {field.label}
+              {field.required && <span className="text-red-500">*</span>}
+            </label>
+          )}
           {renderField(field)}
         </div>
       ))}

@@ -64,6 +64,37 @@ export class DatabaseService {
     }
   }
 
+  async deleteImage(timestamp: string): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      // Delete from IndexedDB
+      await new Promise<void>((resolve, reject) => {
+        const transaction = this.db!.transaction(STORE_NAME, 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(timestamp);
+
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve();
+      });
+
+      // Update metadata in localStorage
+      const savedMetadata = localStorage.getItem(METADATA_KEY);
+      if (savedMetadata) {
+        const metadata = JSON.parse(savedMetadata);
+        const updatedMetadata = metadata.filter(
+          (item: Omit<GeneratedImage, 'imageData'>) => item.timestamp !== timestamp
+        );
+        localStorage.setItem(METADATA_KEY, JSON.stringify(updatedMetadata));
+      }
+
+      console.log('Image deleted successfully:', timestamp);
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      throw error;
+    }
+  }
+
   async loadImages(): Promise<GeneratedImage[]> {
     if (!this.db) throw new Error('Database not initialized');
 

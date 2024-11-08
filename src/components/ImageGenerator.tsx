@@ -115,22 +115,39 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
       });
     };
 
+    const getValidRequestBody = (values: Record<string, any>) => {
+      const currentModel = values.model || selectedModel;
+      const modelSchema = modelValidations[currentModel];
+      
+      if (!modelSchema) return values;
+
+      // Get the shape of the validation schema
+      const schemaShape = modelSchema.shape;
+      
+      // Only include fields that are defined in the schema
+      const validFields = Object.keys(schemaShape);
+      const filteredValues = Object.fromEntries(
+        Object.entries(values).filter(([key]) => validFields.includes(key))
+      );
+
+      return {
+        ...filteredValues,
+        model: currentModel,
+        response_format: 'b64_json',
+        output_format: 'png',
+      };
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsLoading(true);
       setError('');
 
       try {
-        const currentModel = formValues.model || selectedModel;
-        const requestBody = {
-          ...formValues,
-          model: currentModel,
-          response_format: 'b64_json',
-          output_format: 'png',
-        };
+        const requestBody = getValidRequestBody(formValues);
 
         // Validate request body against model schema
-        const modelSchema = modelValidations[currentModel];
+        const modelSchema = modelValidations[requestBody.model];
         if (modelSchema) {
           modelSchema.parse(requestBody);
         }
@@ -158,10 +175,7 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
           imageData: data.data[0].b64_json,
           prompt: formValues.prompt,
           revised_prompt: data.data[0].revised_prompt,
-          settings: {
-            model: currentModel,
-            ...formValues,
-          },
+          settings: requestBody,
           timestamp: new Date().toISOString(),
         };
 

@@ -3,6 +3,7 @@ import { Image as ImageIcon, Moon, Sun, Info } from 'lucide-react';
 import ImageGenerator, { ImageGeneratorRef } from './components/ImageGenerator';
 import ImageHistory from './components/ImageHistory';
 import ImageModal from './components/ImageModal';
+import InfoModal from './components/InfoModal';
 import { GeneratedImage } from './types';
 import { DatabaseService } from './services/databaseService';
 import favicon from "/public/favicon.svg";
@@ -13,10 +14,9 @@ function App() {
   const generatorRef = useRef<ImageGeneratorRef>(null);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
-  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(
-    null
-  );
+  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   // Initialize darkMode based on the system preference
   const [darkMode, setDarkMode] = useState(() => {
@@ -97,6 +97,20 @@ function App() {
     }
   };
 
+  const handleDeleteImage = async (timestamp: string) => {
+    try {
+      await db.deleteImage(timestamp);
+      setGeneratedImages((prevImages) => 
+        prevImages.filter((img) => img.timestamp !== timestamp)
+      );
+      if (currentImage?.timestamp === timestamp) {
+        setCurrentImage(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+    }
+  };
+
   const getSettingLabel = (key: string): string => {
     return key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
   };
@@ -117,7 +131,6 @@ function App() {
           <span className="flex items-center mb-1"> - Image Generation</span>
         </h1>
         <div>
-          {/* Dark mode toggle button */}
           <button
             onClick={toggleDarkMode}
             className="px-2 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
@@ -125,7 +138,7 @@ function App() {
             {darkMode ? <Sun /> : <Moon />}
           </button>
           <button
-            onClick={toggleDarkMode}
+            onClick={() => setShowInfoModal(true)}
             className="px-2 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
           >
             <Info />
@@ -157,7 +170,7 @@ function App() {
                 <p className="mt-2 text-xs text-gray-500">
                   <strong>Settings: </strong>
                   {Object.entries(currentImage.settings)
-                    .filter(([key]) => key !== 'prompt') // Exclude 'prompt' from the output
+                    .filter(([key]) => key !== 'prompt')
                     .map(([key, value]) => `${getSettingLabel(key)}: ${value}`)
                     .join(', ')}
                 </p>
@@ -176,6 +189,7 @@ function App() {
             images={generatedImages}
             onClearHistory={handleClearHistory}
             onImageClick={handleImageClick}
+            onDeleteImage={handleDeleteImage}
           />
         </section>
       </main>
@@ -186,6 +200,7 @@ function App() {
           onLoadSettings={handleLoadSettings}
         />
       )}
+      {showInfoModal && <InfoModal onClose={() => setShowInfoModal(false)} />}
     </div>
   );
 }

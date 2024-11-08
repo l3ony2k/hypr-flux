@@ -7,6 +7,7 @@ interface ImageHistoryProps {
   images: GeneratedImage[];
   onClearHistory: () => void;
   onImageClick: (image: GeneratedImage) => void;
+  onDeleteImage: (timestamp: string) => void;
 }
 
 const IMAGES_PER_PAGE = 60;
@@ -15,6 +16,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
   images,
   onClearHistory,
   onImageClick,
+  onDeleteImage,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(images.length / IMAGES_PER_PAGE);
@@ -37,6 +39,13 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDelete = (e: React.MouseEvent, timestamp: string) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this image?')) {
+      onDeleteImage(timestamp);
+    }
   };
 
   const startIndex = (currentPage - 1) * IMAGES_PER_PAGE;
@@ -100,13 +109,22 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
               alt={image.prompt}
               className="w-full h-32 object-cover mb-1"
             />
-            <button
-              onClick={(e) => handleDownload(e, image)}
-              className="absolute top-2 right-2 p-1 bg-gray-200 bg-opacity-75 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
-              title="Download image"
-            >
-              <Download size={16} />
-            </button>
+            <div className="absolute top-2 right-2 flex gap-1">
+              <button
+                onClick={(e) => handleDownload(e, image)}
+                className="p-1 bg-gray-200 bg-opacity-75 hover:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Download image"
+              >
+                <Download size={16} />
+              </button>
+              <button
+                onClick={(e) => handleDelete(e, image.timestamp)}
+                className="p-1 bg-gray-200 bg-opacity-75 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Delete image"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
             <p className="text-xs text-gray-600 truncate">
               <strong>Prompt: </strong>
               {image.prompt}
