@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Trash2, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Trash2, ChevronLeft, ChevronRight, Download, Upload, FileDown, FileUp } from 'lucide-react';
 import { GeneratedImage } from '../types';
 import { generateUniqueFileName } from '../utils/fileUtils';
 
@@ -8,6 +8,7 @@ interface ImageHistoryProps {
   onClearHistory: () => void;
   onImageClick: (image: GeneratedImage) => void;
   onDeleteImage: (timestamp: string) => void;
+  onImportImages: (images: GeneratedImage[]) => void;
 }
 
 const IMAGES_PER_PAGE = 60;
@@ -17,9 +18,11 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
   onClearHistory,
   onImageClick,
   onDeleteImage,
+  onImportImages,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(images.length / IMAGES_PER_PAGE);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClearClick = () => {
     if (
@@ -32,7 +35,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
   };
 
   const handleDownload = (e: React.MouseEvent, image: GeneratedImage) => {
-    e.stopPropagation(); // Prevent opening the modal
+    e.stopPropagation();
     const link = document.createElement('a');
     link.href = `data:image/png;base64,${image.imageData}`;
     link.download = generateUniqueFileName(image.prompt, image.timestamp);
@@ -45,6 +48,56 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this image?')) {
       onDeleteImage(timestamp);
+    }
+  };
+
+  const handleExportHistory = () => {
+    const exportData = {
+      version: '1.0',
+      timestamp: new Date().toISOString(),
+      images: images,
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `hypr-flux-history-${new Date().toISOString()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      // Validate the imported data
+      if (!data.version || !Array.isArray(data.images)) {
+        throw new Error('Invalid import file format');
+      }
+
+      // Process and import the images
+      onImportImages(data.images);
+      
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Import failed:', error);
+      alert('Failed to import history. Please make sure the file is valid.');
     }
   };
 
@@ -89,11 +142,32 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
             </div>
           )}
           <button
+            onClick={handleExportHistory}
+            className="text-gray-500 hover:text-gray-700 flex items-center"
+            title="Export history"
+          >
+            <FileDown size={20} />
+          </button>
+          <button
+            onClick={handleImportClick}
+            className="text-gray-500 hover:text-gray-700 flex items-center"
+            title="Import history"
+          >
+            <FileUp size={20} />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <button
             onClick={handleClearClick}
             className="text-red-500 hover:text-red-700 flex items-center"
             title="Clear history"
           >
-            <Trash2 size={20} className="mr-1" />
+            <Trash2 size={20} />
           </button>
         </div>
       </div>

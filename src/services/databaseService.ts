@@ -64,6 +64,30 @@ export class DatabaseService {
     }
   }
 
+  async importImages(images: GeneratedImage[]): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      // Get existing timestamps to avoid duplicates
+      const savedMetadata = localStorage.getItem(METADATA_KEY);
+      const existingMetadata = savedMetadata ? JSON.parse(savedMetadata) : [];
+      const existingTimestamps = new Set(existingMetadata.map((m: any) => m.timestamp));
+
+      // Filter out duplicates
+      const newImages = images.filter(img => !existingTimestamps.has(img.timestamp));
+
+      // Save new images
+      await Promise.all(newImages.map(async (image) => {
+        await this.saveImage(image);
+      }));
+
+      console.log(`Imported ${newImages.length} new images`);
+    } catch (error) {
+      console.error('Failed to import images:', error);
+      throw error;
+    }
+  }
+
   async deleteImage(timestamp: string): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 

@@ -111,8 +111,14 @@ function App() {
     }
   };
 
-  const getSettingLabel = (key: string): string => {
-    return key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+  const handleImportImages = async (images: GeneratedImage[]) => {
+    try {
+      await db.importImages(images);
+      const updatedImages = await db.loadImages();
+      setGeneratedImages(updatedImages);
+    } catch (error) {
+      console.error('Failed to import images:', error);
+    }
   };
 
   if (isLoading) {
@@ -171,7 +177,7 @@ function App() {
                   <strong>Settings: </strong>
                   {Object.entries(currentImage.settings)
                     .filter(([key]) => key !== 'prompt')
-                    .map(([key, value]) => `${getSettingLabel(key)}: ${value}`)
+                    .map(([key, value]) => `${key}: ${value}`)
                     .join(', ')}
                 </p>
               </>
@@ -190,6 +196,7 @@ function App() {
             onClearHistory={handleClearHistory}
             onImageClick={handleImageClick}
             onDeleteImage={handleDeleteImage}
+            onImportImages={handleImportImages}
           />
         </section>
       </main>
