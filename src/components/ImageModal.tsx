@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { X, Download } from 'lucide-react';
+import { X, ImageDown } from 'lucide-react';
 import { GeneratedImage } from '../types';
 import { generateUniqueFileName } from '../utils/fileUtils';
 
@@ -64,7 +64,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
               className="text-gray-500 hover:bg-gray-200 p-2"
               title="Download image"
             >
-              <Download size={24} />
+              <ImageDown size={24} />
             </button>
             <button
               onClick={onClose}

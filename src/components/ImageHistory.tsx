@@ -1,5 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Trash2, ChevronLeft, ChevronRight, Download, Upload, FileDown, FileUp } from 'lucide-react';
+import {
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Upload,
+  ImageDown,
+} from 'lucide-react';
 import { GeneratedImage } from '../types';
 import { generateUniqueFileName } from '../utils/fileUtils';
 
@@ -75,7 +82,9 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -90,7 +99,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
 
       // Process and import the images
       onImportImages(data.images);
-      
+
       // Reset the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -146,14 +155,14 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
             className="text-gray-500 hover:text-gray-700 flex items-center"
             title="Export history"
           >
-            <FileDown size={20} />
+            <Upload size={20} />
           </button>
           <button
             onClick={handleImportClick}
             className="text-gray-500 hover:text-gray-700 flex items-center"
             title="Import history"
           >
-            <FileUp size={20} />
+            <Download size={20} />
           </button>
           <input
             ref={fileInputRef}
@@ -164,7 +173,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
           />
           <button
             onClick={handleClearClick}
-            className="text-red-500 hover:text-red-700 flex items-center"
+            className="text-red-500 hover:text-red-700 flex items-center mr-1"
             title="Clear history"
           >
             <Trash2 size={20} />
@@ -189,7 +198,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
                 className="p-1 bg-gray-200 bg-opacity-75 hover:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Download image"
               >
-                <Download size={16} />
+                <ImageDown size={16} />
               </button>
               <button
                 onClick={(e) => handleDelete(e, image.timestamp)}

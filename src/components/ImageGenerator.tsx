@@ -118,12 +118,12 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
     const getValidRequestBody = (values: Record<string, any>) => {
       const currentModel = values.model || selectedModel;
       const modelSchema = modelValidations[currentModel];
-      
+
       if (!modelSchema) return values;
 
       // Get the shape of the validation schema
       const schemaShape = modelSchema.shape;
-      
+
       // Only include fields that are defined in the schema
       const validFields = Object.keys(schemaShape);
       const filteredValues = Object.fromEntries(
@@ -167,7 +167,13 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to generate image');
+          throw new Error(
+            errorData.error?.message || // {error: {message: "..."}}
+              errorData.message || // {message: "..."}
+              errorData.error || // {error: "..."}
+              response.statusText || // HTTP status text if all else fails
+              'Failed to generate image, no error msg caught, plz check response manually.'
+          );
         }
 
         const data = await response.json();

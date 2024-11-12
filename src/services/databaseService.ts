@@ -33,7 +33,7 @@ export class DatabaseService {
     }
   }
 
-  async saveImage(image: GeneratedImage): Promise<void> {
+  async saveImage(image: GeneratedImage, prepend: boolean = true): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
     try {
@@ -54,7 +54,14 @@ export class DatabaseService {
       const savedMetadata = localStorage.getItem(METADATA_KEY);
       const metadata = savedMetadata ? JSON.parse(savedMetadata) : [];
       const { imageData, ...metaWithoutImage } = image;
-      metadata.unshift(metaWithoutImage);
+      
+      // Add the new image metadata at the beginning or end based on prepend flag
+      if (prepend) {
+        metadata.unshift(metaWithoutImage);
+      } else {
+        metadata.push(metaWithoutImage);
+      }
+      
       localStorage.setItem(METADATA_KEY, JSON.stringify(metadata));
 
       console.log('Image saved successfully:', image.timestamp);
@@ -73,13 +80,16 @@ export class DatabaseService {
       const existingMetadata = savedMetadata ? JSON.parse(savedMetadata) : [];
       const existingTimestamps = new Set(existingMetadata.map((m: any) => m.timestamp));
 
-      // Filter out duplicates
+      // Filter out duplicates while maintaining order
       const newImages = images.filter(img => !existingTimestamps.has(img.timestamp));
 
-      // Save new images
-      await Promise.all(newImages.map(async (image) => {
-        await this.saveImage(image);
-      }));
+      // Clear existing metadata
+      localStorage.removeItem(METADATA_KEY);
+
+      // Save new images in the original order
+      for (const image of newImages) {
+        await this.saveImage(image, false); // Pass false to append instead of prepend
+      }
 
       console.log(`Imported ${newImages.length} new images`);
     } catch (error) {

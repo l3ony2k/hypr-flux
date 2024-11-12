@@ -100,7 +100,7 @@ export type Field = {
   type: 'text' | 'number' | 'select' | 'range' | 'textarea' | 'checkbox';
   label: string;
   required?: boolean;
-  options?: string[];
+  options?: (string|number)[];
   min?: number;
   max?: number;
   step?: number;
@@ -216,17 +216,17 @@ export const modelFamilies: ModelFamily[] = [
             label: 'Model Version',
             required: true,
             options: [
-              'sdxl-1.0',
-              'sd3-core',
+              'sd3.5-large',
+              'sd3.5-medium',
+              'sd3.5-large-turbo',
               'sd3-ultra',
               'sd3-large',
               'sd3-large-turbo',
+              'sd3-core',
               'sd3-medium',
-              'sd3.5-large',
-              'sd3.5-large-turbo',
-              'sd3.5-medium'
+              'sdxl-1.0',
             ],
-            default: 'sdxl-1.0',
+            default: 'sd3.5-large',
           },
           {
             name: 'prompt',
@@ -251,18 +251,22 @@ export const modelFamilies: ModelFamily[] = [
           },
           {
             name: 'height',
-            type: 'select',
+            type: 'range',
             label: 'Height',
-            options: ['1024', '1152', '1216', '1344', '1536', '640', '768', '832', '896'],
-            default: '1024',
+            min: 640,
+            max: 1536,
+            step: 64,
+            default: 1024,
             showFor: ['sdxl-1.0'],
           },
           {
             name: 'width',
-            type: 'select',
+            type: 'range',
             label: 'Width',
-            options: ['1024', '1152', '1216', '1344', '1536', '640', '768', '832', '896'],
-            default: '1024',
+            min: 640,
+            max: 1536,
+            step: 64,
+            default: 1024,
             showFor: ['sdxl-1.0'],
           },
           {
@@ -293,13 +297,6 @@ export const modelFamilies: ModelFamily[] = [
             ],
             default: 'K_EULER',
             showFor: ['sdxl-1.0'],
-          },
-          {
-            name: 'seed',
-            type: 'number',
-            label: 'Seed',
-            min: 0,
-            max: 4294967295,
           },
           {
             name: 'steps',
@@ -351,6 +348,13 @@ export const modelFamilies: ModelFamily[] = [
               'tile-texture',
             ],
             showFor: ['sdxl-1.0', 'sd3-core'],
+          },
+          {
+            name: 'seed',
+            type: 'number',
+            label: 'Seed',
+            min: 0,
+            max: 4294967295,
           },
         ],
       },
