@@ -3,8 +3,8 @@ import { z } from 'zod';
 // Common validation schemas
 const baseValidation = {
   prompt: z.string().min(1).max(10000),
-  response_format: z.enum(['url', 'b64_json']).optional(),
-  output_format: z.enum(['png', 'jpeg', 'webp']).optional(),
+  response_format: z.enum(['url', 'b64_json']).default('b64_json'),
+  output_format: z.enum(['png', 'jpeg', 'webp']).default('png'),
 };
 
 // Model-specific validation schemas

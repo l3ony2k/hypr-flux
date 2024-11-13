@@ -162,7 +162,11 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
         const response = await fetch(apiEndpoint, {
           method: 'POST',
           headers,
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify({
+            ...requestBody,
+            response_format: 'b64_json',
+            output_format: 'png',
+          }),
         });
 
         if (!response.ok) {
