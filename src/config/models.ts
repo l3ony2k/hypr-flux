@@ -457,8 +457,8 @@ export const modelFamilies: ModelFamily[] = [
             type: 'select',
             label: 'Model Version',
             required: true,
-            options: ['dall-e-3', 'dall-e-2'],
-            default: 'dall-e-3',
+            options: ['azure/dall-e-3', 'dall-e-3', 'dall-e-2'],
+            default: 'azure/dall-e-3',
           },
           {
             name: 'prompt',
@@ -472,7 +472,7 @@ export const modelFamilies: ModelFamily[] = [
             label: 'Size',
             required: true,
             options: ['1024x1024', '1792x1024', '1024x1792'],
-            showFor: ['dall-e-3'],
+            showFor: ['azure/dall-e-3', 'dall-e-3'],
             default: '1024x1024',
           },
           {
@@ -489,7 +489,7 @@ export const modelFamilies: ModelFamily[] = [
             type: 'select',
             label: 'Quality',
             options: ['standard', 'hd'],
-            showFor: ['dall-e-3'],
+            showFor: ['azure/dall-e-3', 'dall-e-3'],
             default: 'standard',
           },
           {
@@ -497,7 +497,7 @@ export const modelFamilies: ModelFamily[] = [
             type: 'select',
             label: 'Style',
             options: ['vivid', 'natural'],
-            showFor: ['dall-e-3'],
+            showFor: ['azure/dall-e-3', 'dall-e-3'],
             default: 'vivid',
           },
         ],
