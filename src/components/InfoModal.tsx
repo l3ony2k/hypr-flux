@@ -57,6 +57,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
             leave it to defaults, then 4) hit the generate button. Your
             generated images will be saved automatically in your history.
           </p>
+          <p><small>Made By Leon & Hyprlab.io. Open source on <a href="https://github.com/l3ony2k/hypr-flux" target="_blank" rel="noopener noreferrer">GitHub</a>.</small></p>
         </div>
       </div>
     </div>
