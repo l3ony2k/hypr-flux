@@ -130,6 +130,12 @@ const ImageGenerator = forwardRef<ImageGeneratorRef, ImageGeneratorProps>(
         Object.entries(values).filter(([key]) => validFields.includes(key))
       );
 
+      // Special handling for DALL-E 3 models: remove style field if set to 'none'
+      if ((currentModel === 'dall-e-3' || currentModel === 'azure/dall-e-3') && 
+          filteredValues.style === 'none') {
+        delete filteredValues.style;
+      }
+
       return {
         ...filteredValues,
         model: currentModel,

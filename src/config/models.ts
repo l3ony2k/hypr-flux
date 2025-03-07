@@ -9,6 +9,25 @@ const baseValidation = {
 
 // Model-specific validation schemas
 export const modelValidations = {
+  'dall-e-3': z.object({
+    ...baseValidation,
+    model: z.literal('dall-e-3'),
+    size: z.enum(['1024x1024', '1792x1024', '1024x1792']),
+    quality: z.enum(['standard', 'hd']).optional(),
+    style: z.enum(['vivid', 'natural']).optional(), // style is optional to support 'none' option
+  }),
+  'azure/dall-e-3': z.object({
+    ...baseValidation,
+    model: z.literal('azure/dall-e-3'),
+    size: z.enum(['1024x1024', '1792x1024', '1024x1792']),
+    quality: z.enum(['standard', 'hd']).optional(),
+    style: z.enum(['vivid', 'natural']).optional(), // style is optional to support 'none' option
+  }),
+  'dall-e-2': z.object({
+    ...baseValidation,
+    model: z.literal('dall-e-2'),
+    size: z.enum(['256x256', '512x512', '1024x1024']),
+  }),
   'sdxl-1.0': z.object({
     ...baseValidation,
     model: z.literal('sdxl-1.0'),
@@ -496,7 +515,7 @@ export const modelFamilies: ModelFamily[] = [
             name: 'style',
             type: 'select',
             label: 'Style',
-            options: ['vivid', 'natural'],
+            options: ['vivid', 'natural', 'none'],
             showFor: ['azure/dall-e-3', 'dall-e-3'],
             default: 'vivid',
           },
