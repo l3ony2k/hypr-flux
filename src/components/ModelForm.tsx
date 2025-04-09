@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { modelFamilies, type Field } from '../config/models';
+import React, { useEffect } from "react";
+import { modelFamilies, type Field } from "../config/models";
+import FileUpload from "./FileUpload";
 
 interface ModelFormProps {
   modelId: string;
@@ -15,10 +16,10 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
         model.id === modelId ||
         model.fields.some(
           (field) =>
-            field.type === 'select' &&
-            field.name === 'model' &&
-            field.options?.includes(modelId)
-        )
+            field.type === "select" &&
+            field.name === "model" &&
+            field.options?.includes(modelId),
+        ),
     );
 
   if (!modelConfig) return null;
@@ -43,13 +44,13 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
   };
 
   const renderField = (field: Field) => {
-    const value = values[field.name] ?? field.default ?? '';
+    const value = values[field.name] ?? field.default ?? "";
 
     switch (field.type) {
-      case 'textarea':
+      case "textarea":
         return (
           <textarea
-            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+            id={`${field.name}-${field.showFor?.join("-") || "all"}`}
             value={value}
             onChange={(e) => onChange(field.name, e.target.value)}
             required={field.required}
@@ -58,10 +59,10 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
           />
         );
 
-      case 'select':
+      case "select":
         return (
           <select
-            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+            id={`${field.name}-${field.showFor?.join("-") || "all"}`}
             value={value}
             onChange={(e) => onChange(field.name, e.target.value)}
             required={field.required}
@@ -75,12 +76,12 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
           </select>
         );
 
-      case 'range':
+      case "range":
         return (
           <div className="flex items-center gap-2">
             <input
               type="range"
-              id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+              id={`${field.name}-${field.showFor?.join("-") || "all"}`}
               value={value}
               onChange={(e) => onChange(field.name, Number(e.target.value))}
               min={field.min}
@@ -94,11 +95,11 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
           </div>
         );
 
-      case 'checkbox':
+      case "checkbox":
         return (
           <div className="flex items-center gap-2">
             <label
-              htmlFor={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+              htmlFor={`${field.name}-${field.showFor?.join("-") || "all"}`}
               className="text-sm font-medium text-gray-700"
             >
               {field.label}
@@ -106,7 +107,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
             </label>
             <input
               type="checkbox"
-              id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+              id={`${field.name}-${field.showFor?.join("-") || "all"}`}
               checked={value}
               onChange={(e) => onChange(field.name, e.target.checked)}
               className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
@@ -114,11 +115,11 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
           </div>
         );
 
-      case 'number':
+      case "number":
         return (
           <input
             type="number"
-            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+            id={`${field.name}-${field.showFor?.join("-") || "all"}`}
             value={value}
             onChange={(e) => onChange(field.name, Number(e.target.value))}
             min={field.min}
@@ -128,11 +129,18 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
           />
         );
 
+      case "file":
+        return (
+          <FileUpload
+            value={value}
+            onFileSelect={(base64) => onChange(field.name, base64)}
+          />
+        );
       default:
         return (
           <input
             type={field.type}
-            id={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+            id={`${field.name}-${field.showFor?.join("-") || "all"}`}
             value={value}
             onChange={(e) => onChange(field.name, e.target.value)}
             required={field.required}
@@ -146,10 +154,10 @@ const ModelForm: React.FC<ModelFormProps> = ({ modelId, values, onChange }) => {
   return (
     <div className="space-y-2">
       {getVisibleFields().map((field) => (
-        <div key={`${field.name}-${field.showFor?.join('-') || 'all'}`}>
-          {field.type !== 'checkbox' && (
+        <div key={`${field.name}-${field.showFor?.join("-") || "all"}`}>
+          {field.type !== "checkbox" && (
             <label
-              htmlFor={`${field.name}-${field.showFor?.join('-') || 'all'}`}
+              htmlFor={`${field.name}-${field.showFor?.join("-") || "all"}`}
               className="block text-sm font-medium text-gray-700"
             >
               {field.label}

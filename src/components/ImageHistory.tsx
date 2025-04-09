@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   Trash2,
   ChevronLeft,
@@ -6,9 +6,9 @@ import {
   Download,
   Upload,
   ImageDown,
-} from 'lucide-react';
-import { GeneratedImage } from '../types';
-import { generateUniqueFileName } from '../utils/fileUtils';
+} from "lucide-react";
+import { GeneratedImage } from "../types";
+import { generateUniqueFileName } from "../utils/fileUtils";
 
 interface ImageHistoryProps {
   images: GeneratedImage[];
@@ -34,7 +34,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
   const handleClearClick = () => {
     if (
       window.confirm(
-        'Are you sure you want to clear all images? This action cannot be undone.'
+        "Are you sure you want to clear all images? This action cannot be undone.",
       )
     ) {
       onClearHistory();
@@ -43,7 +43,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
 
   const handleDownload = (e: React.MouseEvent, image: GeneratedImage) => {
     e.stopPropagation();
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = `data:image/png;base64,${image.imageData}`;
     link.download = generateUniqueFileName(image.prompt, image.timestamp);
     document.body.appendChild(link);
@@ -53,23 +53,23 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
 
   const handleDelete = (e: React.MouseEvent, timestamp: string) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this image?')) {
+    if (window.confirm("Are you sure you want to delete this image?")) {
       onDeleteImage(timestamp);
     }
   };
 
   const handleExportHistory = () => {
     const exportData = {
-      version: '1.0',
+      version: "1.0",
       timestamp: new Date().toISOString(),
       images: images,
     };
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `hypr-flux-history-${new Date().toISOString()}.json`;
     document.body.appendChild(link);
@@ -83,7 +83,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
   };
 
   const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -94,7 +94,7 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
 
       // Validate the imported data
       if (!data.version || !Array.isArray(data.images)) {
-        throw new Error('Invalid import file format');
+        throw new Error("Invalid import file format");
       }
 
       // Process and import the images
@@ -102,11 +102,11 @@ const ImageHistory: React.FC<ImageHistoryProps> = ({
 
       // Reset the file input
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error('Import failed:', error);
-      alert('Failed to import history. Please make sure the file is valid.');
+      console.error("Import failed:", error);
+      alert("Failed to import history. Please make sure the file is valid.");
     }
   };
 

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Image as ImageIcon, Moon, Sun, Info } from 'lucide-react';
-import ImageGenerator, { ImageGeneratorRef } from './components/ImageGenerator';
-import ImageHistory from './components/ImageHistory';
-import ImageModal from './components/ImageModal';
-import InfoModal from './components/InfoModal';
-import { GeneratedImage } from './types';
-import { DatabaseService } from './services/databaseService';
+import React, { useState, useEffect, useRef } from "react";
+import { Image as ImageIcon, Moon, Sun, Info } from "lucide-react";
+import ImageGenerator, { ImageGeneratorRef } from "./components/ImageGenerator";
+import ImageHistory from "./components/ImageHistory";
+import ImageModal from "./components/ImageModal";
+import InfoModal from "./components/InfoModal";
+import { GeneratedImage } from "./types";
+import { DatabaseService } from "./services/databaseService";
 import favicon from "/public/favicon.svg";
 
 const db = new DatabaseService();
@@ -14,7 +14,9 @@ function App() {
   const generatorRef = useRef<ImageGeneratorRef>(null);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [currentImage, setCurrentImage] = useState<GeneratedImage | null>(null);
-  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
+  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [showInfoModal, setShowInfoModal] = useState(false);
 
@@ -22,7 +24,7 @@ function App() {
   const [darkMode, setDarkMode] = useState(() => {
     return (
       window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      window.matchMedia("(prefers-color-scheme: dark)").matches
     );
   });
 
@@ -33,7 +35,7 @@ function App() {
         const images = await db.loadImages();
         setGeneratedImages(images);
       } catch (error) {
-        console.error('Failed to load images:', error);
+        console.error("Failed to load images:", error);
       } finally {
         setIsLoading(false);
       }
@@ -47,10 +49,10 @@ function App() {
     if (window.DarkReader) {
       if (darkMode) {
         window.DarkReader.enable({
-          darkSchemeBackgroundColor: '#191919',
-          darkSchemeTextColor: '#fafafa',
-          scrollbarColor: '',
-          selectionColor: 'auto',
+          darkSchemeBackgroundColor: "#191919",
+          darkSchemeTextColor: "#fafafa",
+          scrollbarColor: "",
+          selectionColor: "auto",
         });
       } else {
         window.DarkReader.disable();
@@ -69,7 +71,7 @@ function App() {
       setGeneratedImages((prevImages) => [newImage, ...prevImages]);
       setCurrentImage(newImage);
     } catch (error) {
-      console.error('Failed to save generated image:', error);
+      console.error("Failed to save generated image:", error);
     }
   };
 
@@ -79,7 +81,7 @@ function App() {
       setGeneratedImages([]);
       setCurrentImage(null);
     } catch (error) {
-      console.error('Failed to clear history:', error);
+      console.error("Failed to clear history:", error);
     }
   };
 
@@ -91,23 +93,35 @@ function App() {
     setSelectedImage(null);
   };
 
-  const handleLoadSettings = (settings: GeneratedImage['settings']) => {
+  const handleLoadSettings = (settings: GeneratedImage["settings"]) => {
     if (generatorRef.current) {
-      generatorRef.current.loadSettings(settings);
+      // Create a clean copy of settings without any null/undefined values or binary data
+      const cleanSettings = Object.entries(settings)
+        .filter(([key, value]) => {
+          // Skip null/undefined values
+          if (value === null || value === undefined) return false;
+          // Skip binary data fields like control_image
+          if (key === "control_image") return false;
+          // For has_control_image, we want to keep it but not send the actual image
+          return true;
+        })
+        .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+      generatorRef.current.loadSettings(cleanSettings);
     }
   };
 
   const handleDeleteImage = async (timestamp: string) => {
     try {
       await db.deleteImage(timestamp);
-      setGeneratedImages((prevImages) => 
-        prevImages.filter((img) => img.timestamp !== timestamp)
+      setGeneratedImages((prevImages) =>
+        prevImages.filter((img) => img.timestamp !== timestamp),
       );
       if (currentImage?.timestamp === timestamp) {
         setCurrentImage(null);
       }
     } catch (error) {
-      console.error('Failed to delete image:', error);
+      console.error("Failed to delete image:", error);
     }
   };
 
@@ -117,7 +131,7 @@ function App() {
       const updatedImages = await db.loadImages();
       setGeneratedImages(updatedImages);
     } catch (error) {
-      console.error('Failed to import images:', error);
+      console.error("Failed to import images:", error);
     }
   };
 
@@ -167,7 +181,7 @@ function App() {
                   src={`data:image/png;base64,${currentImage.imageData}`}
                   alt={currentImage.prompt}
                   className="w-full h-auto object-contain"
-                  style={{ maxHeight: 'calc(100% - 4rem)' }}
+                  style={{ maxHeight: "calc(100% - 4rem)" }}
                 />
                 <p className="mt-2 text-sm text-gray-600">
                   <strong>Prompt: </strong>
@@ -176,9 +190,23 @@ function App() {
                 <p className="mt-2 text-xs text-gray-500">
                   <strong>Settings: </strong>
                   {Object.entries(currentImage.settings)
-                    .filter(([key]) => key !== 'prompt')
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(', ')}
+                    .filter(([key]) => key !== "prompt")
+                    .map(([key, value]) => {
+                      // Special handling for placeholders
+                      if (key === "control_image_file")
+                        return `control_image: control_image.temp`;
+                      if (key === "image_prompt_file")
+                        return `image_prompt: image_prompt.temp`;
+                      // Skip flags
+                      if (
+                        key === "has_control_image" ||
+                        key === "has_image_prompt"
+                      )
+                        return null;
+                      return `${key}: ${value}`;
+                    })
+                    .filter(Boolean) // Remove null entries
+                    .join(", ")}
                 </p>
               </>
             ) : (
