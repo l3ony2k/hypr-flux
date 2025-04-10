@@ -1,6 +1,6 @@
-const DB_NAME = 'hyprFluxDB';
+const DB_NAME = "hyprFluxDB";
 const DB_VERSION = 1;
-const STORE_NAME = 'images';
+const STORE_NAME = "images";
 
 export interface DBImage {
   id: string;
@@ -17,16 +17,19 @@ export const initDB = (): Promise<IDBDatabase> => {
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        db.createObjectStore(STORE_NAME, { keyPath: "id" });
       }
     };
   });
 };
 
-export const saveImage = async (id: string, imageData: string): Promise<void> => {
+export const saveImage = async (
+  id: string,
+  imageData: string,
+): Promise<void> => {
   const db = await initDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.put({ id, imageData });
 
@@ -38,7 +41,7 @@ export const saveImage = async (id: string, imageData: string): Promise<void> =>
 export const getImage = async (id: string): Promise<string | null> => {
   const db = await initDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
 
@@ -53,7 +56,7 @@ export const getImage = async (id: string): Promise<string | null> => {
 export const deleteImage = async (id: string): Promise<void> => {
   const db = await initDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.delete(id);
 
@@ -65,7 +68,7 @@ export const deleteImage = async (id: string): Promise<void> => {
 export const clearImages = async (): Promise<void> => {
   const db = await initDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.clear();
 

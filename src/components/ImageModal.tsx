@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { X, ImageDown } from 'lucide-react';
-import { GeneratedImage } from '../types';
-import { generateUniqueFileName } from '../utils/fileUtils';
+import React, { useEffect, useRef } from "react";
+import { X, ImageDown } from "lucide-react";
+import { GeneratedImage } from "../types";
+import { generateUniqueFileName } from "../utils/fileUtils";
 
 interface ImageModalProps {
   image: GeneratedImage;
@@ -21,14 +21,14 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
 
   const handleDownload = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = `data:image/png;base64,${image.imageData}`;
     link.download = generateUniqueFileName(image.prompt, image.timestamp);
     document.body.appendChild(link);
@@ -37,17 +37,19 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
   };
 
   const renderSettingValue = (key: string, value: any) => {
-    if (key === 'model') return value;
-    if (key === 'prompt') return value;
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    if (typeof value === 'number') return value.toString();
-    if (typeof value === 'string') return value;
-    if (Array.isArray(value)) return value.join(', ');
+    if (key === "model") return value;
+    if (key === "prompt") return value;
+    if (key === "control_image_file") return "control_image.temp";
+    if (key === "image_prompt_file") return "image_prompt.temp";
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (typeof value === "number") return value.toString();
+    if (typeof value === "string") return value;
+    if (Array.isArray(value)) return value.join(", ");
     return JSON.stringify(value);
   };
 
   const getSettingLabel = (key: string): string => {
-    return key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+    return key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, " ");
   };
 
   return (
@@ -98,7 +100,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ image, onClose }) => {
                 </tr>
               )}
               {Object.entries(image.settings)
-                .filter(([key]) => key !== 'prompt')
+                .filter(([key]) => key !== "prompt")
                 .map(([key, value]) => (
                   <tr key={key} className="border-b">
                     <td className="p-2 align-top font-semibold bg-gray-100 w-1/4">

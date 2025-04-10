@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useRef } from "react";
+import { X } from "lucide-react";
 
 interface InfoModalProps {
   onClose: () => void;
@@ -18,9 +18,9 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
 
@@ -57,7 +57,19 @@ const InfoModal: React.FC<InfoModalProps> = ({ onClose }) => {
             leave it to defaults, then 4) hit the generate button. Your
             generated images will be saved automatically in your history.
           </p>
-          <p><small>Made By Leon & Hyprlab.io. Open source on <a href="https://github.com/l3ony2k/hypr-flux" target="_blank" rel="noopener noreferrer">GitHub</a>.</small></p>
+          <p>
+            <small>
+              Made By Leon & Hyprlab.io. Open source on{" "}
+              <a
+                href="https://github.com/l3ony2k/hypr-flux"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GitHub
+              </a>
+              .
+            </small>
+          </p>
         </div>
       </div>
     </div>

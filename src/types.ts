@@ -1,5 +1,5 @@
 export interface GeneratedImage {
-  imageData: string;  // base64 encoded image data
+  imageData: string; // base64 encoded image data
   prompt: string;
   revised_prompt?: string; // Optional revised prompt from DALL-E
   settings: {
